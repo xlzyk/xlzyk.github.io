@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小林资源库教程专区</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('body-bg.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+        }
+
+        /* 标题区域 */
+        .header {
+            position: relative;
+            /* padding: 40px 0; */
+            text-align: center;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('header-bg.jpg');
+            background-size: cover;
+            opacity: 0.8;
+            z-index: -1;
+        }
+
+        .header img {
+            width: 400px;
+            /* height: 200px; */
+            object-fit: cover;
+            /* margin-bottom: 15px; */
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+        }
+		
+        /* 导航栏 */
+        .nav {
+            background: #333;
+            padding: 1rem;
+			background: rgba(255, 255, 255, 0.9);
+			/* padding: 5px 0; */
+			box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: #333;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+			font-size: 1.1em;
+			transition: all 0.3s ease; /* 添加过渡动画 */
+			border-radius: 20px; /* 添加圆角 */
+        }
+		
+		/* 鼠标悬停效果 */
+		.nav-link:hover {
+		    background-color: #00aaff; 
+		    color: #fff;
+		}
+		
+		/* 当前选中状态 */
+		.nav-link.active {
+		    background-color: #4CAF50;
+		    font-weight: bold;
+			color: #ffffff;
+		}
+		
+
+		.video-container {
+			text-align: center;
+		  max-width: 1200px;
+		  margin: 0 auto;
+		  padding: 3px;
+		}
+		video {
+		  width: 100%;
+		  height: auto;
+		  display: block;
+		}
+		h2{
+			padding: 5px;
+		}
+		.video-container img{
+			width: 100%;
+			height: auto;
+			display: block;
+		}		
+		.video-container p{
+			color: red;
+			padding-bottom: 5px;
+		}
+
+        /* 页脚 */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: rgba(231, 231, 231, 0.7);
+            color: #9a9a9a;
+            margin-top: 50px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-wrap: wrap;
+            }
+            
+            .nav-item {
+                margin: 5px;
+                font-size: 0.9em;
+            }
+
+            .card-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <img src="https://img.alicdn.com/imgextra/i3/2217352522021/O1CN01zvvPGC1QnfVQS9gqn_!!2217352522021.png" alt="网站Logo">
+        <!-- <h1>小林资源库</h1> -->
+        <!-- <p>小林资源库教程专区</p> -->
+    </header>
+
+	<nav class="nav">
+	    <ul class="nav-list">
+	        <li><a href="../index.html" class="nav-link">手机教程</a></li>
+	        <li><a href="../pcjc.html" class="nav-link">电脑教程</a></li>
+	        <li><a href="../zbjc.html" class="nav-link">指标教程</a></li>
+	    </ul>
+	</nav>
+	
+<div class="video-container">
+	<h2>手机上使用指标教程</h2>
+	<p>温馨提示：视频教程只是演示操作方法，演示的指标跟购买的指标是不一样的。</p>
+  <video src="http://cloud.video.taobao.com/play/u/null/p/1/e/6/t/1/519030268610.mp4" controls></video>
+</div>
+
+
+    <footer class="footer">
+        <p>© 2025 小林资源库 ｜ 探索无限可能</p>
+    </footer>
+</body>
+</html>
