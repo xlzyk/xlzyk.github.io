@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教师任教班级随机分配工具</title>
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .description {
+            color: #7f8c8d;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        h2 {
+            color: #3498db;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #eaeaea;
+        }
+        .template-download {
+            text-align: center;
+            padding: 15px;
+            background: #e8f4fc;
+            border-radius: 8px;
+        }
+        .file-upload {
+            text-align: center;
+            padding: 20px;
+            border: 2px dashed #3498db;
+            border-radius: 8px;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .file-upload:hover {
+            background: #e8f4fc;
+        }
+        .file-upload p {
+            margin-top: 10px;
+            color: #7f8c8d;
+        }
+        .class-input {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .btn-danger {
+            background: #e74c3c;
+        }
+        .btn-danger:hover {
+            background: #c0392b;
+        }
+        .btn-success {
+            background: #2ecc71;
+        }
+        .btn-success:hover {
+            background: #27ae60;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eaeaea;
+        }
+        th {
+            background: #f8fafc;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        tr:hover {
+            background: #f5f7fa;
+        }
+        .teacher-list, .result-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .animation-container {
+            position: relative;
+            height: 200px;
+            overflow: hidden;
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            margin: 20px 0;
+            background: #f8fafc;
+        }
+        .animation-item {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #3498db;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .hidden {
+            display: none;
+        }
+        .status {
+            text-align: center;
+            padding: 10px;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>教师任教班级随机分配工具</h1>
+            <p class="description">上传教师名单，随机分配班级，并导出分配结果</p>
+        </header>
+
+        <div class="section">
+            <h2>1. 下载模板</h2>
+            <div class="template-download">
+                <p>下载Excel模板文件，按照模板格式填写教师名单后上传</p>
+                <button id="download-template">下载模板</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>2. 上传教师名单</h2>
+            <div class="file-upload" id="drop-area">
+                <input type="file" id="file-input" accept=".xlsx, .xls" style="display:none;">
+                <label for="file-input" style="cursor:pointer;">
+                    <strong>点击选择文件</strong> 或拖拽文件到此处
+                </label>
+                <p>支持.xlsx或.xls格式的Excel文件</p>
+            </div>
+            <div id="file-name" class="status">未选择文件</div>
+        </div>
+
+        <div class="section">
+            <h2>3. 设置班级数量</h2>
+            <div class="class-input">
+                <label for="class-count">班级数量:</label>
+                <input type="number" id="class-count" min="1" max="20" value="5">
+                <button id="assign-classes">分配班级</button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>4. 教师名单与班级分配</h2>
+            <div class="teacher-list">
+                <table id="teacher-table">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>教师姓名</th>
+                            <th>分配班级</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teacher-list-body">
+                        <!-- 教师列表将在这里动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>5. 随机匹配</h2>
+            <div class="controls">
+                <button id="start-matching" disabled>开始匹配</button>
+                <button id="stop-matching" disabled>停止匹配</button>
+            </div>
+            <div class="animation-container" id="animation-container">
+                <div class="animation-item" id="animation-item">点击"开始匹配"按钮开始随机分配</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>6. 匹配结果</h2>
+            <div class="result-list">
+                <table id="result-table">
+                    <thead>
+                        <tr>
+                            <th>班级</th>
+                            <th>教师姓名</th>
+                        </tr>
+                    </thead>
+                    <tbody id="result-list-body">
+                        <!-- 匹配结果将在这里动态生成 -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="controls">
+                <button id="export-results" class="btn-success" disabled>导出结果</button>
+            </div>
+        </div>
+
+        <footer>
+            <p>教师班级随机分配工具 &copy; 2025</p>
+        </footer>
+    </div>
+
+    <script>
+        // 全局变量
+        let teachers = [];
+        let classCount = 5;
+        let animationInterval = null;
+        let currentAnimationIndex = 0;
+
+        // DOM元素
+        const fileInput = document.getElementById('file-input');
+        const dropArea = document.getElementById('drop-area');
+        const fileName = document.getElementById('file-name');
+        const classCountInput = document.getElementById('class-count');
+        const assignClassesBtn = document.getElementById('assign-classes');
+        const teacherListBody = document.getElementById('teacher-list-body');
+        const startMatchingBtn = document.getElementById('start-matching');
+        const stopMatchingBtn = document.getElementById('stop-matching');
+        const animationItem = document.getElementById('animation-item');
+        const resultListBody = document.getElementById('result-list-body');
+        const exportResultsBtn = document.getElementById('export-results');
+        const downloadTemplateBtn = document.getElementById('download-template');
+
+        // 下载模板
+        downloadTemplateBtn.addEventListener('click', function() {
+            // 创建工作簿
+            const wb = XLSX.utils.book_new();
+            
+            // 创建数据
+            const templateData = [
+                ['教师姓名'],
+                ['张三'],
+                ['李四'],
+                ['王五'],
+                ['赵六']
+            ];
+            
+            // 创建工作表
+            const ws = XLSX.utils.aoa_to_sheet(templateData);
+            
+            // 将工作表添加到工作簿
+            XLSX.utils.book_append_sheet(wb, ws, '教师名单');
+            
+            // 下载文件
+            XLSX.writeFile(wb, '教师名单模板.xlsx');
+        });
+
+        // 文件上传处理
+        fileInput.addEventListener('change', handleFileUpload);
+        
+        // 拖放功能
+        dropArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            dropArea.style.background = '#e3f2fd';
+        });
+        
+        dropArea.addEventListener('dragleave', function() {
+            dropArea.style.background = '#f8fafc';
+        });
+        
+        dropArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            dropArea.style.background = '#f8fafc';
+            
+            if (e.dataTransfer.files.length) {
+                fileInput.files = e.dataTransfer.files;
+                handleFileUpload();
+            }
+        });
+        
+        function handleFileUpload() {
+            const file = fileInput.files[0];
+            if (!file) return;
+            
+            fileName.textContent = `已选择: ${file.name}`;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                
+                // 获取第一个工作表
+                const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                
+                // 转换为JSON
+                const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                
+                // 提取教师姓名
+                teachers = jsonData.map((row, index) => {
+                    // 尝试不同的可能列名
+                    const name = row['教师姓名'] || row['姓名'] || row['名字'] || row['教师'] || row['name'] || '';
+                    return {
+                        id: index + 1,
+                        name: name.trim(),
+                        class: null
+                    };
+                }).filter(teacher => teacher.name !== '');
+                
+                // 显示教师列表
+                displayTeachers();
+                
+                // 启用分配班级按钮
+                assignClassesBtn.disabled = false;
+            };
+            reader.readAsArrayBuffer(file);
+        }
+        
+        // 显示教师列表
+        function displayTeachers() {
+            teacherListBody.innerHTML = '';
+            
+            teachers.forEach(teacher => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${teacher.id}</td>
+                    <td>${teacher.name}</td>
+                    <td>${teacher.class || '未分配'}</td>
+                `;
+                teacherListBody.appendChild(row);
+            });
+        }
+        
+        // 分配班级
+        assignClassesBtn.addEventListener('click', function() {
+            classCount = parseInt(classCountInput.value) || 5;
+            
+            // 随机分配班级
+            const shuffledTeachers = [...teachers].sort(() => Math.random() - 0.5);
+            
+            for (let i = 0; i < shuffledTeachers.length; i++) {
+                shuffledTeachers[i].class = (i % classCount) + 1;
+            }
+            
+            // 按ID重新排序
+            teachers.sort((a, b) => a.id - b.id);
+            
+            // 更新显示
+            displayTeachers();
+            
+            // 启用开始匹配按钮
+            startMatchingBtn.disabled = false;
+        });
+        
+        // 开始匹配动画
+        startMatchingBtn.addEventListener('click', function() {
+            startMatchingBtn.disabled = true;
+            stopMatchingBtn.disabled = false;
+            
+            // 开始动画
+            let counter = 0;
+            animationInterval = setInterval(() => {
+                // 随机选择一名教师和一个班级
+                const randomTeacherIndex = Math.floor(Math.random() * teachers.length);
+                const randomClass = Math.floor(Math.random() * classCount) + 1;
+                
+                const teacher = teachers[randomTeacherIndex];
+                animationItem.textContent = `${teacher.name} → 班级 ${randomClass}`;
+                
+                // 变化背景色增加动画效果
+                const colors = ['#3498db', '#2ecc71', '#e74c3c', '#f39c12', '#9b59b6'];
+                animationItem.style.color = colors[counter % colors.length];
+                
+                counter++;
+            }, 100);
+        });
+        
+        // 停止匹配
+        stopMatchingBtn.addEventListener('click', function() {
+            clearInterval(animationInterval);
+            startMatchingBtn.disabled = false;
+            stopMatchingBtn.disabled = true;
+            
+            // 确定最终分配
+            const shuffledTeachers = [...teachers].sort(() => Math.random() - 0.5);
+            
+            for (let i = 0; i < shuffledTeachers.length; i++) {
+                shuffledTeachers[i].class = (i % classCount) + 1;
+            }
+            
+            // 按ID重新排序
+            teachers.sort((a, b) => a.id - b.id);
+            
+            // 更新显示
+            displayTeachers();
+            
+            // 显示结果
+            displayResults();
+            
+            // 启用导出按钮
+            exportResultsBtn.disabled = false;
+            
+            // 显示最终匹配结果
+            const randomTeacherIndex = Math.floor(Math.random() * teachers.length);
+            const teacher = teachers[randomTeacherIndex];
+            animationItem.textContent = `最终分配: ${teacher.name} → 班级 ${teacher.class}`;
+            animationItem.style.color = '#2c3e50';
+        });
+        
+        // 显示结果
+        function displayResults() {
+            resultListBody.innerHTML = '';
+            
+            // 按班级分组
+            const classes = {};
+            for (let i = 1; i <= classCount; i++) {
+                classes[i] = [];
+            }
+            
+            teachers.forEach(teacher => {
+                if (teacher.class) {
+                    classes[teacher.class].push(teacher.name);
+                }
+            });
+            
+            // 显示每个班级的教师
+            for (let i = 1; i <= classCount; i++) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>班级 ${i}</td>
+                    <td>${classes[i].join('、')}</td>
+                `;
+                resultListBody.appendChild(row);
+            }
+        }
+        
+        // 导出结果
+        exportResultsBtn.addEventListener('click', function() {
+            // 准备导出数据
+            const exportData = teachers.map(teacher => ({
+                '序号': teacher.id,
+                '教师姓名': teacher.name,
+                '分配班级': teacher.class ? `班级 ${teacher.class}` : '未分配'
+            }));
+            
+            // 创建工作表
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            
+            // 创建工作簿
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, '分配结果');
+            
+            // 导出文件
+            XLSX.writeFile(wb, '教师班级分配结果.xlsx');
+        });
+    </script>
+</body>
+</html>

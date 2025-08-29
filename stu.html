@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学校新生智能分班系统 v2.1</title>
+    <style>
+        :root {
+            --primary-color: #4b86b4;
+            --primary-hover: #3a6a8a;
+            --bg-color: #f0f8ff;
+            --text-color: #2a4d69;
+            --error-color: #ff6b6b;
+            --female-color: #ff9999;
+            --male-color: #99ccff;
+            --border-color: #4b86b4;
+            --light-border: #e0e0e0;
+            --header-bg: #e6f2ff;
+            --shuffle-color: #ff9900;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+		
+		.biaoti{
+			text-align: center;
+		}
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        .status-bar {
+            flex-grow: 1;
+            text-align: right;
+            padding-right: 20px;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            width: 300px;
+            background-color: white;
+            padding: 15px;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            overflow-y: auto;
+        }
+
+        .panel-section {
+            margin-bottom: 15px;
+            border: 1px solid var(--light-border);
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .panel-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: "Microsoft YaHei", sans-serif;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .btn-shuffle {
+            background-color: var(--shuffle-color);
+        }
+
+        .btn-shuffle:hover {
+            background-color: #e68a00;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 6px;
+            border: 1px solid var(--light-border);
+            border-radius: 4px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .checkbox-group input {
+            margin-right: 8px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            padding: 15px;
+            overflow: hidden;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--light-border);
+            margin-bottom: 10px;
+        }
+
+        .tab {
+            padding: 10px 15px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+            font-weight: bold;
+        }
+
+        .tab.active {
+            border-color: var(--light-border);
+            border-bottom-color: white;
+            background-color: white;
+        }
+
+        .tab-content {
+            display: none;
+            background-color: white;
+            padding: 15px;
+            border-radius: 0 5px 5px 5px;
+            height: calc(100vh - 150px);
+            overflow: auto;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Data Table */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .data-table th, .data-table td {
+            border: 1px solid var(--light-border);
+            padding: 8px;
+            text-align: center;
+        }
+
+        .data-table th {
+            background-color: var(--header-bg);
+            font-weight: bold;
+        }
+
+        .data-table tr.error {
+            background-color: var(--error-color);
+        }
+
+        /* Stats Table */
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .stats-table th, .stats-table td {
+            border: 1px solid var(--light-border);
+            padding: 8px;
+            text-align: center;
+        }
+
+        .stats-table th {
+            background-color: var(--header-bg);
+            font-weight: bold;
+        }
+
+        /* Animation Canvas */
+        .animation-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            z-index: 1000;
+            display: none;
+            flex-direction: column;
+        }
+
+        .animation-header {
+            padding: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .animation-canvas {
+            flex-grow: 1;
+            background-color: white;
+            position: relative;
+            overflow: auto;
+        }
+
+        .class-area {
+            position: absolute;
+            border: 2px solid var(--border-color);
+            background-color: var(--header-bg);
+            border-radius: 5px;
+        }
+
+        .student-icon {
+            position: absolute;
+            width: 35px;
+            height: 30px;
+            border: 1px solid #666;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 8px;
+            cursor: pointer;
+        }
+
+        .student-icon.female {
+            background-color: var(--female-color);
+        }
+
+        .student-icon.male {
+            background-color: var(--male-color);
+        }
+
+        /* Log */
+        .log-container {
+            height: 100%;
+            border: 1px solid var(--light-border);
+            padding: 10px;
+            overflow-y: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+
+        /* Stats Differences */
+        .diff-container {
+            display: flex;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .diff-item {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+            margin-bottom: 10px;
+        }
+
+        .diff-label {
+            margin-right: 5px;
+            font-weight: bold;
+        }
+
+        .diff-value {
+            font-weight: bold;
+        }
+
+        .diff-value.good {
+            color: green;
+        }
+
+        .diff-value.bad {
+            color: red;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .modal-message {
+            margin-bottom: 20px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 8px 15px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .modal-btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .modal-btn-secondary {
+            background-color: #cccccc;
+        }
+
+        /* Shuffle animation */
+        @keyframes shuffle {
+            0% { transform: translateY(0); }
+            25% { transform: translateY(-3px); }
+            50% { transform: translateY(0); }
+            75% { transform: translateY(3px); }
+            100% { transform: translateY(0); }
+        }
+
+        .shuffling {
+            animation: shuffle 0.3s infinite;
+        }
+    </style>
+</head>
+<body>
+	<!-- <h1 class="biaoti">学校新生智能分班系统 v2.1</h1> -->
+	<!-- <hr /> -->
+    <div class="container">
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <div class="panel-section">
+                <div class="panel-title">数据导入</div>
+                <button id="importBtn" class="btn">导入Excel数据</button>
+                <button id="templateBtn" class="btn">下载模板</button>
+                <input type="file" id="fileInput" style="display: none;" accept=".xlsx,.xls">
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title">分班设置</div>
+                <div class="form-group">
+                    <label for="classNum">班级数量:</label>
+                    <input type="number" id="classNum" min="2" max="20" value="5">
+                </div>
+                <div class="form-group">
+                    <label for="animationSpeed">动画速度:</label>
+                    <input type="range" id="animationSpeed" min="0.1" max="20" step="0.1" value="3">
+                    <span id="speedValue">3.0</span>
+                </div>
+                <div class="form-group">
+                    <label>平衡因素:</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="genderBalance" checked>
+                        <label for="genderBalance">性别均衡</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-title">操作</div>
+                <button id="shuffleBtn" class="btn btn-shuffle">开始打乱名单</button>
+                <button id="startBtn" class="btn">开始分班</button>
+                <button id="statsBtn" class="btn" disabled>查看统计</button>
+				<button id="exportBtn" class="btn" disabled>导出结果</button>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="tabs">
+                <div class="tab active" data-tab="data">学生数据</div>
+                <div class="tab" data-tab="stats">分班统计</div>
+                <div class="tab" data-tab="log">分班日志</div>
+            </div>
+
+            <!-- Data Tab -->
+            <div class="tab-content active" id="dataTab">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>姓名</th>
+                            <th>性别</th>
+                            <th>出生日期</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataTableBody">
+                        <!-- Data will be populated here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Stats Tab -->
+            <div class="tab-content" id="statsTab">
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th>班级</th>
+                            <th>人数</th>
+                            <th>男生</th>
+                            <th>女生</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statsTableBody">
+                        <!-- Stats will be populated here -->
+                    </tbody>
+                </table>
+
+                <div class="diff-container">
+                    <div class="panel-title">性别分布差异</div>
+                    <div class="diff-item">
+                        <span class="diff-label">男生:</span>
+                        <span class="diff-value" id="maleDiff">0</span>
+                    </div>
+                    <div class="diff-item">
+                        <span class="diff-label">女生:</span>
+                        <span class="diff-value" id="femaleDiff">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Log Tab -->
+            <div class="tab-content" id="logTab">
+                <div class="log-container" id="logContent">
+                    <!-- Log messages will be displayed here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Animation Window -->
+    <div class="animation-container" id="animationWindow">
+        <div class="animation-header">
+            <div>分班过程</div>
+            <button id="closeAnimationBtn">关闭</button>
+        </div>
+        <div class="animation-canvas" id="animationCanvas">
+            <!-- Animation elements will be added here -->
+        </div>
+    </div>
+
+    <!-- Modal Dialog -->
+    <div class="modal" id="modalDialog">
+        <div class="modal-content">
+            <div class="modal-title" id="modalTitle">提示</div>
+            <div class="modal-message" id="modalMessage"></div>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-secondary" id="modalCancelBtn">取消</button>
+                <button class="modal-btn modal-btn-primary" id="modalConfirmBtn">确定</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // Global variables
+        let studentData = null;
+        let classes = [];
+        let classNum = 5;
+        let animationSpeed = 3.0;
+        const balanceThreshold = 1; // 性别均衡阈值设为1人
+        const maxIterations = 300;
+        let animationRunning = false;
+        let studentIcons = {};
+        let classSizes = [];
+        let shuffleInterval = null;
+        let isShuffling = false;
+
+        // DOM elements
+        const importBtn = document.getElementById('importBtn');
+        const templateBtn = document.getElementById('templateBtn');
+        const fileInput = document.getElementById('fileInput');
+        const classNumInput = document.getElementById('classNum');
+        const animationSpeedInput = document.getElementById('animationSpeed');
+        const speedValue = document.getElementById('speedValue');
+        const genderBalanceCheckbox = document.getElementById('genderBalance');
+        const shuffleBtn = document.getElementById('shuffleBtn');
+        const startBtn = document.getElementById('startBtn');
+        const exportBtn = document.getElementById('exportBtn');
+        const statsBtn = document.getElementById('statsBtn');
+        const dataTableBody = document.getElementById('dataTableBody');
+        const statsTableBody = document.getElementById('statsTableBody');
+        const logContent = document.getElementById('logContent');
+        const animationWindow = document.getElementById('animationWindow');
+        const animationCanvas = document.getElementById('animationCanvas');
+        const closeAnimationBtn = document.getElementById('closeAnimationBtn');
+        const modalDialog = document.getElementById('modalDialog');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalMessage = document.getElementById('modalMessage');
+        const modalCancelBtn = document.getElementById('modalCancelBtn');
+        const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // Tab switching
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(`${tab.dataset.tab}Tab`).classList.add('active');
+            });
+        });
+
+        // Event listeners
+        importBtn.addEventListener('click', () => fileInput.click());
+        templateBtn.addEventListener('click', downloadTemplate);
+        fileInput.addEventListener('change', handleFileImport);
+        classNumInput.addEventListener('change', updateClassNum);
+        animationSpeedInput.addEventListener('input', updateAnimationSpeed);
+        shuffleBtn.addEventListener('click', toggleShuffle);
+        startBtn.addEventListener('click', startAssignment);
+        exportBtn.addEventListener('click', exportResults);
+        statsBtn.addEventListener('click', showStatistics);
+        closeAnimationBtn.addEventListener('click', closeAnimationWindow);
+        modalCancelBtn.addEventListener('click', () => hideModal());
+        modalConfirmBtn.addEventListener('click', confirmModalAction);
+
+        // Initialize
+        updateAnimationSpeed();
+
+        // Functions
+        function downloadTemplate() {
+            // 创建模板数据
+            const templateData = [
+                ['序号', '姓名', '性别', '出生日期'],
+                [1, '张三', '男', '2015-03-15'],
+                [2, '李四', '女', '2015-07-22'],
+                [3, '王五', '男', '2015-11-30'],
+                [4, '赵六', '女', '2015-05-18']
+            ];
+            
+            // 创建工作簿
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(templateData);
+            
+            // 添加工作表到工作簿
+            XLSX.utils.book_append_sheet(wb, ws, "学生名单模板");
+            
+            // 下载文件
+            XLSX.writeFile(wb, "学生分班模板.xlsx");
+            logMessage("已下载模板文件: 学生分班模板.xlsx");
+        }
+
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet, { defval: "" });
+
+                    // 检查必要的列
+                    const requiredColumns = ["序号", "姓名", "性别", "出生日期"];
+                    const missingColumns = requiredColumns.filter(col => !jsonData[0] || !(col in jsonData[0]));
+                    
+                    if (missingColumns.length > 0) {
+                        showError(`数据文件中缺少以下必要列: ${missingColumns.join(', ')}`);
+                        return;
+                    }
+
+                    // 处理数据
+                    studentData = jsonData.map((row, index) => {
+                        return {
+                            id: index + 1,
+                            serial: parseInt(row['序号']) || 0,
+                            name: String(row['姓名'] || '').trim(),
+                            gender: String(row['性别'] || '').trim(),
+                            birthDate: String(row['出生日期'] || '').trim()
+                        };
+                    });
+
+                    updateDataTable();
+                    logMessage(`导入数据: ${file.name}`);
+                    logMessage(`学生总数: ${studentData.length}`);
+                    updateStatus(`成功导入数据: ${studentData.length} 名学生`);
+                    exportBtn.disabled = false;
+                    statsBtn.disabled = false;
+                } catch (error) {
+                    showError(`导入数据时出错: ${error.message}`);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function updateDataTable() {
+            if (!studentData) return;
+
+            dataTableBody.innerHTML = '';
+            studentData.forEach(student => {
+                const row = document.createElement('tr');
+                if (student.error) row.classList.add('error');
+                
+                row.innerHTML = `
+                    <td>${student.serial}</td>
+                    <td>${student.name}</td>
+                    <td>${student.gender}</td>
+                    <td>${student.birthDate}</td>
+                `;
+                dataTableBody.appendChild(row);
+            });
+        }
+
+        function updateClassNum() {
+            classNum = parseInt(classNumInput.value) || 5;
+            if (classNum < 2) classNum = 2;
+            if (classNum > 20) classNum = 20;
+            classNumInput.value = classNum;
+        }
+
+        function updateAnimationSpeed() {
+            animationSpeed = parseFloat(animationSpeedInput.value);
+            speedValue.textContent = animationSpeed.toFixed(1);
+        }
+
+        function toggleShuffle() {
+            if (!studentData || studentData.length === 0) {
+                showError('没有可用的学生数据');
+                return;
+            }
+
+            if (isShuffling) {
+                // 停止打乱
+                clearInterval(shuffleInterval);
+                isShuffling = false;
+                shuffleBtn.textContent = '开始打乱名单';
+                dataTableBody.classList.remove('shuffling');
+                logMessage('停止打乱名单');
+            } else {
+                // 开始打乱
+                isShuffling = true;
+                shuffleBtn.textContent = '停止打乱';
+                dataTableBody.classList.add('shuffling');
+                logMessage('开始打乱名单...');
+                
+                // 设置打乱间隔
+                shuffleInterval = setInterval(() => {
+                    shuffleStudents();
+                }, 300);
+            }
+        }
+
+        function shuffleStudents() {
+            if (!studentData) return;
+            
+            // Fisher-Yates 洗牌算法
+            for (let i = studentData.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [studentData[i], studentData[j]] = [studentData[j], studentData[i]];
+            }
+            
+            updateDataTable();
+        }
+
+        function logMessage(message) {
+            const line = document.createElement('div');
+            line.textContent = message;
+            logContent.appendChild(line);
+            logContent.scrollTop = logContent.scrollHeight;
+        }
+
+        function updateStatus(message) {
+            // In a real implementation, you would update a status bar element
+            console.log(`Status: ${message}`);
+        }
+
+        function showError(message) {
+            showModal('错误', message);
+            logMessage(`错误: ${message}`);
+        }
+
+        function showModal(title, message, confirmCallback = null) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modalDialog.style.display = 'flex';
+            
+            if (confirmCallback) {
+                currentConfirmCallback = confirmCallback;
+                modalCancelBtn.style.display = 'inline-block';
+            } else {
+                modalCancelBtn.style.display = 'none';
+            }
+        }
+
+        function hideModal() {
+            modalDialog.style.display = 'none';
+        }
+
+        let currentConfirmCallback = null;
+        function confirmModalAction() {
+            hideModal();
+            if (currentConfirmCallback) {
+                currentConfirmCallback();
+                currentConfirmCallback = null;
+            }
+        }
+
+        function startAssignment() {
+            if (!studentData || studentData.length === 0) {
+                showError('没有可用的学生数据');
+                return;
+            }
+
+            // 如果正在打乱，先停止
+            if (isShuffling) {
+                clearInterval(shuffleInterval);
+                isShuffling = false;
+                shuffleBtn.textContent = '开始打乱名单';
+                dataTableBody.classList.remove('shuffling');
+            }
+
+            classNum = parseInt(classNumInput.value) || 5;
+            animationSpeed = parseFloat(animationSpeedInput.value);
+            
+            // Disable buttons
+            [importBtn, templateBtn, shuffleBtn, startBtn, exportBtn, statsBtn].forEach(btn => {
+                btn.disabled = true;
+            });
+
+            // Clear classes
+            classes = Array.from({ length: classNum }, () => []);
+            
+            // Start assignment in a timeout to allow UI to update
+            setTimeout(() => {
+                performAssignment();
+            }, 100);
+        }
+
+        function performAssignment() {
+            try {
+                logMessage('\n===== 开始分班处理 =====');
+                updateStatus('开始分班处理...');
+                
+                // Clear log
+                logContent.innerHTML = '';
+                
+                // 按性别分组
+                const maleStudents = studentData.filter(s => s.gender === '男');
+                const femaleStudents = studentData.filter(s => s.gender === '女');
+                
+                logMessage(`男生人数: ${maleStudents.length}`);
+                logMessage(`女生人数: ${femaleStudents.length}`);
+                
+                // 计算目标班级人数
+                const totalStudents = studentData.length;
+                const baseSize = Math.floor(totalStudents / classNum);
+                const extra = totalStudents % classNum;
+                classSizes = Array.from({ length: classNum }, (_, i) => baseSize + (i < extra ? 1 : 0));
+                
+                logMessage(`班级目标人数: ${classSizes.join(', ')}`);
+                
+                // 显示动画窗口
+                showAnimationWindow();
+                drawClassAreas();
+                
+                // 初始化分配
+                let classIdx = 0;
+                let direction = 1;
+                
+                // 合并男女生列表，交替分配
+                const allStudents = [];
+                const maxLength = Math.max(maleStudents.length, femaleStudents.length);
+                
+                for (let i = 0; i < maxLength; i++) {
+                    if (i < maleStudents.length) allStudents.push(maleStudents[i]);
+                    if (i < femaleStudents.length) allStudents.push(femaleStudents[i]);
+                }
+                
+                const assignNextStudent = (index) => {
+                    if (index >= allStudents.length) {
+                        // 初始分配完成
+                        logMessage('\n初始分班完成!');
+                        calculateAndLogStats();
+                        
+                        // 处理性别均衡
+                        if (genderBalanceCheckbox.checked) {
+                            balanceGenderDistribution();
+                            logMessage('\n处理性别均衡完成!');
+                            calculateAndLogStats();
+                        }
+                        
+                        // 更新动画显示最终位置
+                        updateAnimation();
+                        
+                        // 显示完成消息
+                        const canvas = document.getElementById('animationCanvas');
+                        const completionMsg = document.createElement('div');
+                        completionMsg.textContent = '分班完成!';
+                        completionMsg.style.position = 'absolute';
+                        completionMsg.style.left = '50%';
+                        completionMsg.style.bottom = '30px';
+                        completionMsg.style.transform = 'translateX(-50%)';
+                        completionMsg.style.fontSize = '16px';
+                        completionMsg.style.fontWeight = 'bold';
+                        completionMsg.style.color = '#2a4d69';
+                        canvas.appendChild(completionMsg);
+                        
+                        // Enable buttons
+                        [importBtn, templateBtn, shuffleBtn, startBtn, exportBtn, statsBtn].forEach(btn => {
+                            btn.disabled = false;
+                        });
+                        
+                        updateStatus(`分班完成! 共分配 ${studentData.length} 名学生到 ${classNum} 个班级`);
+                        logMessage('\n===== 分班完成! =====');
+                        
+                        return;
+                    }
+                    
+                    const student = allStudents[index];
+                    updateStatus(`分配学生: ${student.name} (性别: ${student.gender})`);
+                    
+                    // 查找下一个可用班级
+                    while (classes[classIdx].length >= classSizes[classIdx]) {
+                        classIdx += direction;
+                        
+                        if (classIdx >= classNum) {
+                            classIdx = classNum - 1;
+                            direction = -1;
+                        } else if (classIdx < 0) {
+                            classIdx = 0;
+                            direction = 1;
+                        }
+                    }
+                    
+                    // 添加到班级
+                    classes[classIdx].push(student);
+                    
+                    // 创建学生图标
+                    createStudentIcon(student, classIdx, classes[classIdx].length);
+                    
+                    // 更新班级标签
+                    updateClassLabel(classIdx);
+                    
+                    // 延迟后移动到下一个学生
+                    setTimeout(() => {
+                        if (classIdx === 0 && direction === -1) {
+                            direction = 1;
+                        } else if (classIdx === classNum - 1 && direction === 1) {
+                            direction = -1;
+                        } else {
+                            classIdx += direction;
+                        }
+                        
+                        assignNextStudent(index + 1);
+                    }, 1000 / animationSpeed);
+                };
+                
+                // 开始分配
+                assignNextStudent(0);
+            } catch (error) {
+                logMessage(`错误: ${error.message}`);
+                showError(`分班过程中出错: ${error.message}`);
+                
+                // Enable buttons
+                [importBtn, templateBtn, shuffleBtn, startBtn, exportBtn, statsBtn].forEach(btn => {
+                    btn.disabled = false;
+                });
+            }
+        }
+
+        function balanceGenderDistribution() {
+            if (!genderBalanceCheckbox.checked) return;
+            
+            logMessage('开始处理性别均衡...');
+            
+            // 计算每个班级的男女生数量
+            const classGenders = classes.map(cls => {
+                return {
+                    male: cls.filter(s => s.gender === '男').length,
+                    female: cls.filter(s => s.gender === '女').length
+                };
+            });
+            
+            // 计算目标男女生数量
+            const totalMale = classGenders.reduce((sum, cls) => sum + cls.male, 0);
+            const totalFemale = classGenders.reduce((sum, cls) => sum + cls.female, 0);
+            
+            const targetMalePerClass = Math.floor(totalMale / classNum);
+            const targetFemalePerClass = Math.floor(totalFemale / classNum);
+            
+            logMessage(`目标每班男生数: ${targetMalePerClass}`);
+            logMessage(`目标每班女生数: ${targetFemalePerClass}`);
+            
+            // 调整性别分布
+            let improvements = true;
+            let iterations = 0;
+            const maxIterations = 50;
+            
+            while (improvements && iterations < maxIterations) {
+                improvements = false;
+                iterations++;
+                
+                for (let i = 0; i < classNum; i++) {
+                    for (let j = i + 1; j < classNum; j++) {
+                        // 检查是否需要交换学生以达到性别均衡
+                        const classIMale = classes[i].filter(s => s.gender === '男').length;
+                        const classIFemale = classes[i].filter(s => s.gender === '女').length;
+                        const classJMale = classes[j].filter(s => s.gender === '男').length;
+                        const classJFemale = classes[j].filter(s => s.gender === '女').length;
+                        
+                        // 如果两个班级的性别分布都不均衡，尝试交换
+                        if (Math.abs(classIMale - classJMale) > 1 || Math.abs(classIFemale - classJFemale) > 1) {
+                            // 尝试找到一个男生和一个女生进行交换
+                            const maleInI = classes[i].findIndex(s => s.gender === '男');
+                            const femaleInI = classes[i].findIndex(s => s.gender === '女');
+                            const maleInJ = classes[j].findIndex(s => s.gender === '男');
+                            const femaleInJ = classes[j].findIndex(s => s.gender === '女');
+                            
+                            if (maleInI !== -1 && femaleInJ !== -1) {
+                                // 交换男生和女生
+                                const temp = classes[i][maleInI];
+                                classes[i][maleInI] = classes[j][femaleInJ];
+                                classes[j][femaleInJ] = temp;
+                                improvements = true;
+                                logMessage(`交换学生: ${classes[j][femaleInJ].name}(班${i+1}) <-> ${temp.name}(班${j+1})`);
+                            } else if (femaleInI !== -1 && maleInJ !== -1) {
+                                // 交换女生和男生
+                                const temp = classes[i][femaleInI];
+                                classes[i][femaleInI] = classes[j][maleInJ];
+                                classes[j][maleInJ] = temp;
+                                improvements = true;
+                                logMessage(`交换学生: ${classes[j][maleInJ].name}(班${i+1}) <-> ${temp.name}(班${j+1})`);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            logMessage(`性别均衡处理完成，共进行 ${iterations} 次迭代`);
+        }
+
+        function showAnimationWindow() {
+            animationWindow.style.display = 'flex';
+            animationCanvas.innerHTML = '';
+            
+            // 添加总学生数标签
+            const totalLabel = document.createElement('div');
+            totalLabel.textContent = `学生总数: ${studentData.length}`;
+            totalLabel.style.position = 'absolute';
+            totalLabel.style.top = '10px';
+            totalLabel.style.left = '10px';
+            totalLabel.style.fontFamily = '"Microsoft YaHei", sans-serif';
+            totalLabel.style.fontSize = '12px';
+            totalLabel.style.fontWeight = 'bold';
+            animationCanvas.appendChild(totalLabel);
+        }
+
+        function closeAnimationWindow() {
+            animationWindow.style.display = 'none';
+        }
+
+        function drawClassAreas() {
+            const canvas = document.getElementById('animationCanvas');
+            const canvasWidth = canvas.clientWidth;
+            const canvasHeight = canvas.clientHeight;
+            
+            const marginX = 20;
+            const marginY = 50;
+            const availableWidth = Math.max(100, canvasWidth - 2 * marginX - (classNum - 1) * 15);
+            const classWidth = Math.max(100, availableWidth / classNum);
+            const classHeight = Math.max(100, canvasHeight - 2 * marginY - 100);
+            const classStartX = marginX;
+            const classStartY = marginY;
+            
+            // 清除之前的班级区域
+            const existingAreas = document.querySelectorAll('.class-area');
+            existingAreas.forEach(area => area.remove());
+            
+            // 创建新的班级区域
+            for (let i = 0; i < classNum; i++) {
+                const classArea = document.createElement('div');
+                classArea.className = 'class-area';
+                classArea.style.left = `${classStartX + i * (classWidth + 15)}px`;
+                classArea.style.top = `${classStartY}px`;
+                classArea.style.width = `${classWidth}px`;
+                classArea.style.height = `${classHeight}px`;
+                
+                // 添加班级标签
+                const classLabel = document.createElement('div');
+                classLabel.textContent = `${i+1}班(0/${classSizes[i]})`;
+                classLabel.style.position = 'absolute';
+                classLabel.style.top = '20px';
+                classLabel.style.left = '50%';
+                classLabel.style.transform = 'translateX(-50%)';
+                classLabel.style.fontFamily = '"Microsoft YaHei", sans-serif';
+                classLabel.style.fontSize = '10px';
+                classLabel.style.fontWeight = 'bold';
+                classArea.appendChild(classLabel);
+                
+                classArea.dataset.classIndex = i;
+                classArea.dataset.classLabel = classLabel;
+                
+                animationCanvas.appendChild(classArea);
+            }
+        }
+
+        function createStudentIcon(student, classIdx, studentIdxInClass) {
+            const canvas = document.getElementById('animationCanvas');
+            const classAreas = document.querySelectorAll('.class-area');
+            const classArea = classAreas[classIdx];
+            
+            if (!classArea) return;
+            
+            const classRect = classArea.getBoundingClientRect();
+            const canvasRect = canvas.getBoundingClientRect();
+            
+            const classWidth = classRect.width;
+            const classHeight = classRect.height;
+            const classLeft = classRect.left - canvasRect.left;
+            const classTop = classRect.top - canvasRect.top;
+            
+            const maxPerCol = Math.max(1, Math.floor(classHeight / 30));
+            const col = Math.floor((studentIdxInClass - 1) / maxPerCol);
+            const row = (studentIdxInClass - 1) % maxPerCol;
+            
+            const x = classLeft + 15 + col * 40;
+            const y = classTop + 60 + row * 30;
+            
+            const studentIcon = document.createElement('div');
+            studentIcon.className = `student-icon ${student.gender === '女' ? 'female' : 'male'}`;
+            studentIcon.style.left = `${x}px`;
+            studentIcon.style.top = `${y}px`;
+            
+            const nameText = document.createElement('div');
+            nameText.textContent = student.name;
+            nameText.style.fontSize = '8px';
+            nameText.style.overflow = 'hidden';
+            nameText.style.textOverflow = 'ellipsis';
+            nameText.style.whiteSpace = 'nowrap';
+            studentIcon.appendChild(nameText);
+            
+            canvas.appendChild(studentIcon);
+            
+            // 存储引用以便后续更新
+            if (!studentIcons[student.id]) {
+                studentIcons[student.id] = [];
+            }
+            studentIcons[student.id].push({
+                element: studentIcon,
+                classIdx: classIdx
+            });
+        }
+
+        function updateClassLabel(classIdx) {
+            const classAreas = document.querySelectorAll('.class-area');
+            const classArea = classAreas[classIdx];
+            
+            if (classArea && classArea.dataset.classLabel) {
+                const classLabel = classArea.dataset.classLabel;
+                classLabel.textContent = `${classIdx+1}班(${classes[classIdx].length}/${classSizes[classIdx]})`;
+            }
+        }
+
+        function updateAnimation() {
+            // 在实际实现中，这将更新动画以反映优化过程中的任何学生移动
+        }
+
+        function calculateClassStats() {
+            const stats = {
+                class: [],
+                count: [],
+                male: [],
+                female: []
+            };
+            
+            for (let i = 0; i < classes.length; i++) {
+                const classStudents = classes[i];
+                stats.class.push(`班级 ${i+1}`);
+                stats.count.push(classStudents.length);
+                
+                // 性别计数
+                const maleCount = classStudents.filter(s => s.gender === '男').length;
+                const femaleCount = classStudents.filter(s => s.gender === '女').length;
+                stats.male.push(maleCount);
+                stats.female.push(femaleCount);
+            }
+            
+            return stats;
+        }
+
+        function calculateAndLogStats() {
+            const stats = calculateClassStats();
+            logMessage('\n班级统计:');
+            
+            // 确定列宽
+            const headers = ['班级', '人数', '男生', '女生'];
+            const colWidths = headers.map(h => h.length);
+            
+            // 根据数据更新列宽
+            for (let i = 0; i < stats.class.length; i++) {
+                colWidths[0] = Math.max(colWidths[0], stats.class[i].length);
+                colWidths[1] = Math.max(colWidths[1], stats.count[i].toString().length);
+                colWidths[2] = Math.max(colWidths[2], stats.male[i].toString().length);
+                colWidths[3] = Math.max(colWidths[3], stats.female[i].toString().length);
+            }
+            
+            // 创建标题行
+            let headerRow = '';
+            headers.forEach((header, i) => {
+                headerRow += header.padEnd(colWidths[i] + 2);
+            });
+            logMessage(headerRow);
+            logMessage('-'.repeat(headerRow.length));
+            
+            // 创建数据行
+            for (let i = 0; i < stats.class.length; i++) {
+                let row = '';
+                row += stats.class[i].padEnd(colWidths[0] + 2);
+                row += stats.count[i].toString().padEnd(colWidths[1] + 2);
+                row += stats.male[i].toString().padEnd(colWidths[2] + 2);
+                row += stats.female[i].toString().padEnd(colWidths[3] + 2);
+                logMessage(row);
+            }
+            
+            // 计算最大差异
+            const maleDiff = Math.max(...stats.male) - Math.min(...stats.male);
+            const femaleDiff = Math.max(...stats.female) - Math.min(...stats.female);
+            
+            logMessage('\n性别最大差异:');
+            logMessage(`男生: ${maleDiff}`);
+            logMessage(`女生: ${femaleDiff}`);
+            
+            return stats;
+        }
+
+        function showStatistics() {
+            if (!classes || classes.length === 0 || classes.every(c => c.length === 0)) {
+                showError('请先完成分班');
+                return;
+            }
+            
+            // 切换到统计选项卡
+            tabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            document.querySelector('.tab[data-tab="stats"]').classList.add('active');
+            document.getElementById('statsTab').classList.add('active');
+            
+            // 更新统计表
+            const stats = calculateClassStats();
+            statsTableBody.innerHTML = '';
+            
+            for (let i = 0; i < stats.class.length; i++) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${stats.class[i]}</td>
+                    <td>${stats.count[i]}</td>
+                    <td>${stats.male[i]}</td>
+                    <td>${stats.female[i]}</td>
+                `;
+                statsTableBody.appendChild(row);
+            }
+            
+            // 更新最大差异
+            const maleDiff = Math.max(...stats.male) - Math.min(...stats.male);
+            const femaleDiff = Math.max(...stats.female) - Math.min(...stats.female);
+            
+            document.getElementById('maleDiff').textContent = maleDiff;
+            document.getElementById('femaleDiff').textContent = femaleDiff;
+            
+            // 根据阈值进行颜色编码
+            const setDiffClass = (element, diff) => {
+                element.className = diff <= balanceThreshold ? 'diff-value good' : 'diff-value bad';
+            };
+            
+            setDiffClass(document.getElementById('maleDiff'), maleDiff);
+            setDiffClass(document.getElementById('femaleDiff'), femaleDiff);
+        }
+
+        function exportResults() {
+            // 检查XLSX库是否可用
+            if (typeof XLSX === 'undefined') {
+                showError('Excel导出功能需要XLSX库，请确保网络连接正常');
+                return;
+            }
+
+            if (!classes || classes.length === 0 || classes.every(c => c.length === 0)) {
+                showError('请先完成分班');
+                return;
+            }
+            
+            try {
+                // 创建工作簿
+                const wb = XLSX.utils.book_new();
+                
+                // 1. 创建"全校"工作表，包含所有学生
+                const allStudents = [];
+                classes.forEach((classStudents, classIdx) => {
+                    classStudents.forEach(student => {
+                        const studentWithClass = {
+                            '序号': student.serial,
+                            '姓名': student.name,
+                            '性别': student.gender,
+                            '出生日期': student.birthDate,
+                            '班级': `${classIdx + 1}班`
+                        };
+                        allStudents.push(studentWithClass);
+                    });
+                });
+                
+                if (allStudents.length > 0) {
+                    const allStudentsWS = XLSX.utils.json_to_sheet(allStudents);
+                    XLSX.utils.book_append_sheet(wb, allStudentsWS, "全校");
+                }
+                
+                // 2. 为每个班级创建工作表
+                classes.forEach((classStudents, classIdx) => {
+                    if (classStudents.length > 0) {
+                        const classStudentsWithCNHeaders = classStudents.map(student => ({
+                            '序号': student.serial,
+                            '姓名': student.name,
+                            '性别': student.gender,
+                            '出生日期': student.birthDate
+                        }));
+                        const classWS = XLSX.utils.json_to_sheet(classStudentsWithCNHeaders);
+                        XLSX.utils.book_append_sheet(wb, classWS, `${classIdx + 1}班`);
+                    }
+                });
+                
+                // 3. 创建统计工作表
+                const stats = calculateClassStats();
+                const statsData = [];
+                
+                for (let i = 0; i < stats.class.length; i++) {
+                    statsData.push({
+                        '班级': stats.class[i],
+                        '人数': stats.count[i],
+                        '男生': stats.male[i],
+                        '女生': stats.female[i]
+                    });
+                }
+                
+                if (statsData.length > 0) {
+                    const statsWS = XLSX.utils.json_to_sheet(statsData);
+                    XLSX.utils.book_append_sheet(wb, statsWS, "分班统计");
+                }
+                
+                // 生成文件并触发下载
+                const fileName = prompt("请输入要保存的文件名（不带扩展名）:", "分班结果");
+                if (fileName) {
+                    XLSX.writeFile(wb, `${fileName}.xlsx`);
+                    logMessage(`分班结果已导出至: ${fileName}.xlsx`);
+                }
+            } catch (error) {
+                showError(`导出Excel时出错: ${error.message}`);
+            }
+        }
+    </script>
+</body>
+</html>
